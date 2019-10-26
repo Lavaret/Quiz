@@ -5,7 +5,13 @@
       <h2>{{currentQuestion.question}}</h2>
       <div class="line"/>
       <div class="question-list">
-        <div class="answer" v-for="(answer, index) in answers" :key="index">
+        <div
+          class="answer"
+          v-for="(answer, index) in answers"
+          :key="index"
+          @click="onSelect(index)"
+          :class="[selectedItem === index ? 'selected' : '']"
+        >
           <p>{{answer}}</p>
         </div>
       </div>
@@ -33,12 +39,26 @@ Array.prototype.shuffle = function() {
       currentQuestion: Object,
       onNext: Function
     },
+    data() {
+      return {
+        selectedItem: ''
+      }
+    },
     computed: {
       answers() {
-        let answers = [...this.currentQuestion.incorrect_answers]
-        answers.push(this.currentQuestion.correct_answer)
+        let answers = [...this.currentQuestion.incorrect_answers];
+        answers.push(this.currentQuestion.correct_answer);
         answers.shuffle;
+        console.log(Array);
         return answers
+      },
+      correctAnswer() {
+        return this.currentQuestion.correct_answer;
+      }
+    },
+    methods: {
+      onSelect(index) {
+        this.selectedItem = index;
       }
     }
   }
@@ -98,5 +118,10 @@ Array.prototype.shuffle = function() {
   .answer:hover {
     background-color: #eee;
   }
+
+  .selected {
+    background-color: #eee;
+  }
+
 
 </style>
