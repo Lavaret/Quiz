@@ -1,17 +1,19 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Header />
+    <QuestionBox />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Header from './components/Header.vue'
+import QuestionBox from './components/QuestionBox.vue'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    Header,
+    QuestionBox
   }
 }
 </script>
@@ -21,8 +23,12 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+
+.line {
+  width: 100%;
+  height: 0px;
+  border-bottom: 1px solid rgba(0,0,0,.1);
 }
 </style>
