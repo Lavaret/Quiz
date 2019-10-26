@@ -10,29 +10,18 @@
           v-for="(answer, index) in answers"
           :key="index"
           @click="onSelect(index)"
-          :class="[selectedItem === index ? 'selected' : '']"
+          :class="{selected:isSelected(index), correct:isCorrect}"
         >
           <p>{{answer}}</p>
         </div>
       </div>
-      <button>Save</button>
+      <button @submit="onSubmit">Save</button>
       <button @click="onNext">Next</button>
     </div>
   </section>
 </template>
 <script>
-
-Array.prototype.shuffle = function() {
-  var i = this.length, j, temp;
-  if ( i == 0 ) return this;
-  while ( --i ) {
-     j = Math.floor( Math.random() * ( i + 1 ) );
-     temp = this[i];
-     this[i] = this[j];
-     this[j] = temp;
-  }
-  return this;
-}
+  import lodash from 'lodash';
 
   export default {
     props: {
@@ -41,24 +30,51 @@ Array.prototype.shuffle = function() {
     },
     data() {
       return {
-        selectedItem: ''
+        selectedItem: null,
+        shuffledAnswers: [],
+        correctIndex: null,
+        isCorrect: false,
+        answers: []
+      }
+    },
+    watch: {
+      currentQuestions: {
+        immediate: true,
+        handler() {
+          this.selectedItem = null,
+          this.shuffleAnswers()
+        }
       }
     },
     computed: {
       answers() {
-        let answers = [...this.currentQuestion.incorrect_answers];
-        answers.push(this.currentQuestion.correct_answer);
-        answers.shuffle;
-        console.log(Array);
-        return answers
+        return [
+          ...this.currentQuestion.incorrect_answers,
+           this.currentQuestion.correct_answer
+         ];
       },
-      correctAnswer() {
-        return this.currentQuestion.correct_answer;
-      }
     },
     methods: {
       onSelect(index) {
         this.selectedItem = index;
+      },
+      onSubmit() {
+        if (this.selectedItem === this.correctIndex) {
+          this.isCorrect = true;
+          this.selectedItem = null;
+        }
+      },
+      shuffleAnswers() {
+        let answers = [
+          ...this.currentQuestion.incorrect_answers,
+           this.currentQuestion.correct_answer
+         ];
+
+         this.answers = lodash.shuffle(answers);
+         this.correctIndex = this.answers.indexOf(this.currentQuestion.correct_answer);
+      },
+      isSelected(index) {
+        return this.selectedItem === index ? true : false;
       }
     }
   }
