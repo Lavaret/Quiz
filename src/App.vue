@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header />
-    <QuestionBox />
+    <QuestionBox v-if="questions.results.length" :currentQuestion="questions.results[index]" :onNext="onNext" />
   </div>
 </template>
 
@@ -9,11 +9,35 @@
 import Header from './components/Header.vue'
 import QuestionBox from './components/QuestionBox.vue'
 
+const API_URL = 'https://opentdb.com/api.php?';
+
 export default {
   name: 'app',
   components: {
     Header,
     QuestionBox
+  },
+  data() {
+    return {
+      questions: [],
+      index: 0,
+    }
+  },
+  mounted: function() {
+    fetch(API_URL + 'amount=10', {
+      method: 'get'
+    })
+    .then((response) => {
+      return response.json();
+    })
+    .then((jsonData) => {
+      this.questions = jsonData;
+    })
+  },
+  methods: {
+    onNext() {
+      this.index++;
+    }
   }
 }
 </script>
