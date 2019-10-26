@@ -5,7 +5,9 @@
       <h2>{{currentQuestion.question}}</h2>
       <div class="line"/>
       <div class="question-list">
-        List of questions
+        <div class="answer" v-for="(answer, index) in answers" :key="index">
+          <p>{{answer}}</p>
+        </div>
       </div>
       <button>Save</button>
       <button @click="onNext">Next</button>
@@ -13,10 +15,31 @@
   </section>
 </template>
 <script>
+
+Array.prototype.shuffle = function() {
+  var i = this.length, j, temp;
+  if ( i == 0 ) return this;
+  while ( --i ) {
+     j = Math.floor( Math.random() * ( i + 1 ) );
+     temp = this[i];
+     this[i] = this[j];
+     this[j] = temp;
+  }
+  return this;
+}
+
   export default {
     props: {
       currentQuestion: Object,
       onNext: Function
+    },
+    computed: {
+      answers() {
+        let answers = [...this.currentQuestion.incorrect_answers]
+        answers.push(this.currentQuestion.correct_answer)
+        answers.shuffle;
+        return answers
+      }
     }
   }
 </script>
@@ -40,9 +63,20 @@
   }
 
   .question-wrap {
-    max-width: 50%;
+    margin-top: 20px;
     text-align: center;
-    max-width: 50%;
+  }
+
+  @media(min-width: 800px) {
+    .question-wrap {
+      max-width: 50%;
+    }
+  }
+
+  @media(max-width: 800px) {
+    h2 {
+      font-size: 19px;
+    }
   }
 
   .question {
@@ -54,4 +88,15 @@
   .question-list {
     margin-top: 30px;
   }
+
+  .answer {
+    margin: 2px;
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 5px;
+  }
+
+  .answer:hover {
+    background-color: #eee;
+  }
+
 </style>
