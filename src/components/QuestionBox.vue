@@ -10,12 +10,12 @@
           v-for="(answer, index) in answers"
           :key="index"
           @click="onSelect(index)"
-          :class="{selected:isSelected(index), correct:isCorrect}"
+          :class="{selected:isSelected(index), correct:isCorrect(index)}"
         >
           <p>{{answer}}</p>
         </div>
       </div>
-      <button @submit="onSubmit">Save</button>
+      <button @click="onSubmit">Save</button>
       <button @click="onNext">Next</button>
     </div>
   </section>
@@ -33,14 +33,13 @@
         selectedItem: null,
         shuffledAnswers: [],
         correctIndex: null,
-        isCorrect: false,
-        answers: []
       }
     },
     watch: {
       currentQuestions: {
         immediate: true,
         handler() {
+
           this.selectedItem = null,
           this.shuffleAnswers()
         }
@@ -60,8 +59,8 @@
       },
       onSubmit() {
         if (this.selectedItem === this.correctIndex) {
-          this.isCorrect = true;
           this.selectedItem = null;
+          //
         }
       },
       shuffleAnswers() {
@@ -75,6 +74,9 @@
       },
       isSelected(index) {
         return this.selectedItem === index ? true : false;
+      },
+      isCorrect(index){
+        return index === this.correctIndex ? true : false;
       }
     }
   }
@@ -137,6 +139,10 @@
 
   .selected {
     background-color: #eee;
+  }
+
+  .correct {
+    background-color: lightgreen;
   }
 
 
