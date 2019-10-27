@@ -153,12 +153,6 @@
     }
   }
 
-  .question {
-    padding: 15px;
-    display: flex;
-    justify-content: center;
-  }
-
   .question-list {
     margin-top: 30px;
   }

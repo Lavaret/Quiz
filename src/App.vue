@@ -1,8 +1,9 @@
 <template>
   <div id="app">
     <Header :points="points" :total="total"/>
+    <QuestionSelect v-if="amount === index" :getQuestions="getQuestions"/>
     <QuestionBox
-      v-if="questions.results.length"
+      v-if="questions.results.length && amount > index"
       :currentQuestion="questions.results[index]"
       :onNext="onNext"
       :addPoints="addPoints"
@@ -11,8 +12,9 @@
 </template>
 
 <script>
-import Header from './components/Header.vue'
-import QuestionBox from './components/QuestionBox.vue'
+import Header from './components/Header.vue';
+import QuestionBox from './components/QuestionBox.vue';
+import QuestionSelect from './components/QuestionSelect.vue';
 
 const API_URL = 'https://opentdb.com/api.php?';
 
@@ -20,26 +22,20 @@ export default {
   name: 'app',
   components: {
     Header,
-    QuestionBox
+    QuestionBox,
+    QuestionSelect
   },
   data() {
     return {
       questions: [],
+      amount: 10,
       index: 0,
       points: 0,
       total: 0
     }
   },
   mounted: function() {
-    fetch(API_URL + 'amount=10', {
-      method: 'get'
-    })
-    .then((response) => {
-      return response.json();
-    })
-    .then((jsonData) => {
-      this.questions = jsonData;
-    })
+    this.getQuestions()
   },
   methods: {
     onNext() {
@@ -51,6 +47,17 @@ export default {
       }
 
       this.total++;
+    },
+    getQuestions() {
+      fetch(API_URL + 'amount=' + this.amount, {
+        method: 'get'
+      })
+      .then((response) => {
+        return response.json();
+      })
+      .then((jsonData) => {
+        this.questions = jsonData;
+      })
     }
   }
 }
@@ -68,5 +75,11 @@ export default {
   width: 100%;
   height: 0px;
   border-bottom: 1px solid rgba(0,0,0,.1);
+}
+
+.question {
+  padding: 15px;
+  display: flex;
+  justify-content: center;
 }
 </style>
