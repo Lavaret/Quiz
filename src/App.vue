@@ -1,7 +1,12 @@
 <template>
   <div id="app">
-    <Header />
-    <QuestionBox v-if="questions.results.length" :currentQuestion="questions.results[index]" :onNext="onNext" />
+    <Header :points="points" :total="total"/>
+    <QuestionBox
+      v-if="questions.results.length"
+      :currentQuestion="questions.results[index]"
+      :onNext="onNext"
+      :addPoints="addPoints"
+    />
   </div>
 </template>
 
@@ -21,6 +26,8 @@ export default {
     return {
       questions: [],
       index: 0,
+      points: 0,
+      total: 0
     }
   },
   mounted: function() {
@@ -37,6 +44,13 @@ export default {
   methods: {
     onNext() {
       this.index++;
+    },
+    addPoints(correctAnswer) {
+      if (correctAnswer) {
+        this.points++;
+      }
+
+      this.total++;
     }
   }
 }

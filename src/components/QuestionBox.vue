@@ -2,21 +2,32 @@
   <section class="question">
     <div class="question-wrap">
       <span class="category">{{currentQuestion.category}}</span>
-      <h2>{{currentQuestion.question}}</h2>
+      <h2>{{currentQuestion.question | refactor}}</h2>
       <div class="line"/>
-      <div class="question-list">
+      <div class="question-list" :class="{submitted:submitted}">
         <div
           class="answer"
-          v-for="(answer, index) in answers"
+          v-for="(answer, index) in shuffledAnswers"
           :key="index"
           @click="onSelect(index)"
-          :class="{selected:isSelected(index), correct:isCorrect(index)}"
+          :class="{
+              selected:isSelected(index),
+              correct:isCorrect(index),
+              incorrect:isIncorrect(index)
+            }"
         >
-          <p>{{answer}}</p>
+          <p>{{answer | refactor}}</p>
         </div>
       </div>
-      <button @click="onSubmit">Save</button>
-      <button @click="onNext">Next</button>
+      <button
+        @click="onSubmit"
+        :disabled="selectedItem === null || submitted"
+      >
+        Save
+      </button>
+      <button @click="onNext">
+        Next
+      </button>
     </div>
   </section>
 </template>
@@ -26,21 +37,25 @@
   export default {
     props: {
       currentQuestion: Object,
-      onNext: Function
+      onNext: Function,
+      addPoints: Function
     },
     data() {
       return {
         selectedItem: null,
         shuffledAnswers: [],
         correctIndex: null,
+        correctAnswer: false,
+        submitted: false
       }
     },
     watch: {
-      currentQuestions: {
+      currentQuestion: {
         immediate: true,
         handler() {
-
-          this.selectedItem = null,
+          this.selectedItem = null;
+          this.submitted = false;
+          this.correctAnswer = false;
           this.shuffleAnswers()
         }
       }
@@ -55,13 +70,16 @@
     },
     methods: {
       onSelect(index) {
-        this.selectedItem = index;
+        if (!this.submitted) {
+          this.selectedItem = index;
+        }
       },
       onSubmit() {
         if (this.selectedItem === this.correctIndex) {
-          this.selectedItem = null;
-          //
+          this.correctAnswer = true;
         }
+        this.submitted = true;
+        this.addPoints(this.correctAnswer);
       },
       shuffleAnswers() {
         let answers = [
@@ -69,14 +87,32 @@
            this.currentQuestion.correct_answer
          ];
 
-         this.answers = lodash.shuffle(answers);
-         this.correctIndex = this.answers.indexOf(this.currentQuestion.correct_answer);
+         this.shuffledAnswers = lodash.shuffle(answers);
+         this.correctIndex = this.shuffledAnswers.indexOf(this.currentQuestion.correct_answer);
       },
       isSelected(index) {
         return this.selectedItem === index ? true : false;
       },
-      isCorrect(index){
-        return index === this.correctIndex ? true : false;
+      isCorrect(index) {
+        if (this.correctIndex === index && this.submitted) {
+          return true;
+        }
+
+        return false;
+      },
+      isIncorrect(index) {
+        if (this.selectedItem === index && !this.correctAnswer && this.submitted) {
+          return true;
+        }
+
+        return false;
+      }
+    },
+    filters: {
+      refactor(value) {
+        if (!value) return ''
+        value = value.toString()
+        return unescape(value).replace(/&quot;/g, '"').replace(/&#039;/g, "'");
       }
     }
   }
@@ -127,6 +163,10 @@
     margin-top: 30px;
   }
 
+  .question-list.submitted {
+    pointer-events: none;
+  }
+
   .answer {
     margin: 2px;
     border: 1px solid rgba(0,0,0,.1);
@@ -145,5 +185,8 @@
     background-color: lightgreen;
   }
 
+  .incorrect {
+    background-color: lightcoral;
+  }
 
 </style>
