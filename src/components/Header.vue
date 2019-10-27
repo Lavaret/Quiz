@@ -2,11 +2,21 @@
   <section class="header">
     <div class="header">
       <p class="nav-element"><b>Fancy</b> quiz app</p>
-      <p class="nav-element">Counter 4/10</p>
+      <p class="nav-element">Counter {{points}}/{{total}}</p>
     </div>
     <div class="line"></div>
   </section>
 </template>
+<script>
+
+  export default {
+    props: {
+      points: Number,
+      total: Number
+    }
+  }
+
+</script>
 <style type="scss" scoped>
   .header {
     display: flex;

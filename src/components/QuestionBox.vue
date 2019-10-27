@@ -2,63 +2,117 @@
   <section class="question">
     <div class="question-wrap">
       <span class="category">{{currentQuestion.category}}</span>
-      <h2>{{currentQuestion.question}}</h2>
+      <h2>{{currentQuestion.question | refactor}}</h2>
       <div class="line"/>
-      <div class="question-list">
+      <div class="question-list" :class="{submitted:submitted}">
         <div
           class="answer"
-          v-for="(answer, index) in answers"
+          v-for="(answer, index) in shuffledAnswers"
           :key="index"
           @click="onSelect(index)"
-          :class="[selectedItem === index ? 'selected' : '']"
+          :class="{
+              selected:isSelected(index),
+              correct:isCorrect(index),
+              incorrect:isIncorrect(index)
+            }"
         >
-          <p>{{answer}}</p>
+          <p>{{answer | refactor}}</p>
         </div>
       </div>
-      <button>Save</button>
-      <button @click="onNext">Next</button>
+      <button
+        @click="onSubmit"
+        :disabled="selectedItem === null || submitted"
+      >
+        Save
+      </button>
+      <button @click="onNext">
+        Next
+      </button>
     </div>
   </section>
 </template>
 <script>
-
-Array.prototype.shuffle = function() {
-  var i = this.length, j, temp;
-  if ( i == 0 ) return this;
-  while ( --i ) {
-     j = Math.floor( Math.random() * ( i + 1 ) );
-     temp = this[i];
-     this[i] = this[j];
-     this[j] = temp;
-  }
-  return this;
-}
+  import lodash from 'lodash';
 
   export default {
     props: {
       currentQuestion: Object,
-      onNext: Function
+      onNext: Function,
+      addPoints: Function
     },
     data() {
       return {
-        selectedItem: ''
+        selectedItem: null,
+        shuffledAnswers: [],
+        correctIndex: null,
+        correctAnswer: false,
+        submitted: false
+      }
+    },
+    watch: {
+      currentQuestion: {
+        immediate: true,
+        handler() {
+          this.selectedItem = null;
+          this.submitted = false;
+          this.correctAnswer = false;
+          this.shuffleAnswers()
+        }
       }
     },
     computed: {
       answers() {
-        let answers = [...this.currentQuestion.incorrect_answers];
-        answers.push(this.currentQuestion.correct_answer);
-        answers.shuffle;
-        console.log(Array);
-        return answers
+        return [
+          ...this.currentQuestion.incorrect_answers,
+           this.currentQuestion.correct_answer
+         ];
       },
-      correctAnswer() {
-        return this.currentQuestion.correct_answer;
-      }
     },
     methods: {
       onSelect(index) {
-        this.selectedItem = index;
+        if (!this.submitted) {
+          this.selectedItem = index;
+        }
+      },
+      onSubmit() {
+        if (this.selectedItem === this.correctIndex) {
+          this.correctAnswer = true;
+        }
+        this.submitted = true;
+        this.addPoints(this.correctAnswer);
+      },
+      shuffleAnswers() {
+        let answers = [
+          ...this.currentQuestion.incorrect_answers,
+           this.currentQuestion.correct_answer
+         ];
+
+         this.shuffledAnswers = lodash.shuffle(answers);
+         this.correctIndex = this.shuffledAnswers.indexOf(this.currentQuestion.correct_answer);
+      },
+      isSelected(index) {
+        return this.selectedItem === index ? true : false;
+      },
+      isCorrect(index) {
+        if (this.correctIndex === index && this.submitted) {
+          return true;
+        }
+
+        return false;
+      },
+      isIncorrect(index) {
+        if (this.selectedItem === index && !this.correctAnswer && this.submitted) {
+          return true;
+        }
+
+        return false;
+      }
+    },
+    filters: {
+      refactor(value) {
+        if (!value) return ''
+        value = value.toString()
+        return unescape(value).replace(/&quot;/g, '"').replace(/&#039;/g, "'");
       }
     }
   }
@@ -109,6 +163,10 @@ Array.prototype.shuffle = function() {
     margin-top: 30px;
   }
 
+  .question-list.submitted {
+    pointer-events: none;
+  }
+
   .answer {
     margin: 2px;
     border: 1px solid rgba(0,0,0,.1);
@@ -123,5 +181,12 @@ Array.prototype.shuffle = function() {
     background-color: #eee;
   }
 
+  .correct {
+    background-color: lightgreen;
+  }
+
+  .incorrect {
+    background-color: lightcoral;
+  }
 
 </style>
